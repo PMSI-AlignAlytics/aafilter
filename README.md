@@ -3,7 +3,7 @@
 Filter module built with Angular 6 and angular material
 
 ## Requirements
-**[Angular material](https://material.angular.io):** 
+* **[Angular material](https://material.angular.io)** 
   * **Alternative 1:** Install with Angular CLI  `ng add @angular/material`
   * **Alternative 2:** Install with NPM / Yarn  `https://material.angular.io/guide/getting-started`
 
