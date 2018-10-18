@@ -1,27 +1,47 @@
-# AAFilter
+[![N|Solid](https://travelytic.io/wp-content/uploads/2018/08/AlignAlytics_Logo_Transparent-Background-0112.png)](https://align-alytics.com/)
+# Filter Module
+Filter module built with Angular 6 and angular material
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.3.
+## Requirements
+**[Angular material](https://material.angular.io):** 
+  * **Alternative 1:** Install with Angular CLI  `ng add @angular/material`
+  * **Alternative 2:** Install with NPM / Yarn  `https://material.angular.io/guide/getting-started`
 
-## Development server
+## Getting started
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+1. In your application `npm i aafilter`
+2. Add FilterModule to the imports in app.module.ts  
+    **e.g. app.module.ts**
+   ```  
+    import { BrowserModule } from '@angular/platform-browser';  
+    import { NgModule } from '@angular/core';  
+    import { BrowserAnimationsModule } from '@angular/platform-browser/animations';  
+    import { AppComponent } from './app.component';  
+    import {AafilterModule} from 'aafilter2';
+   
+    @NgModule({  
+     declarations: [  
+       AppComponent,  
+     ],  
+     imports: [  
+       BrowserModule,  
+       BrowserAnimationsModule,  
+       AafilterModule,  
+     ],  
+     providers: [],  
+     bootstrap: [AppComponent]  
+   })  
+   export class AppModule { }
+   ```
 
-## Code scaffolding
+3. Add directive `<aa-filter></aa-filter>` to the component template where you want to use the filter
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Directive properties  
+| Name                                | Description |
+|-------------------------------------|-------------|
+| @Input() <br> endpoint: string      |  Endpoint to make queries            |
+| @Input() <br> cardEndpoint: string  |  Endpoint to get card dimensions         |
+| @Input() <br> dimensions: string    |  Card dimensions            |
 
-## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
