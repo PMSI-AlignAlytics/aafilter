@@ -1,0 +1,157 @@
+
+$primary: #7851A9;
+$light-grey: #ececec;
+$dark-grey: #636363;
+$grey: #ccc;
+
+/******************************************/
+.p-n {
+  padding: 0 !important;
+}
+
+.p-10 {
+  padding: 10px;
+}
+
+.m-n {
+  margin: 0 !important;
+}
+
+.bg-white {
+  background: white;
+}
+
+.overflow {
+  overflow: auto;
+  height: 100%;
+}
+
+.wh {
+  height: 100%;
+  width: 100%;
+}
+
+.grey {
+  color: $grey !important;
+}
+
+.flex-column {
+  flex-direction: column;
+  box-sizing: border-box;
+  display: flex;
+  place-content: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-item {
+  width: 100%;
+  text-align: center;
+}
+
+#filter /deep/ .mat-checkbox-checked.mat-accent .mat-checkbox-background, .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
+  background: $dark-grey !important;
+}
+
+.mat-list, .mat-nav-list, .mat-selection-list {
+  width: 100%;
+  height: 100%;
+}
+.mat-grid-tile {
+  overflow: auto;
+}
+
+.aa-list-item {
+  height: 32px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  a {
+    font-size: 13px;
+  }
+  &:hover {
+    background: $light-grey !important;
+  }
+  &.active {
+    background: $primary !important;
+    border-color: $primary !important;
+    color: white !important;
+  }
+
+}
+
+.aa-checkbox-list-item {
+  height: 32px !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.aa-content {
+  border-top: 1px solid $grey;
+}
+
+label {
+  margin: 0 !important;
+}
+
+.search-icon {
+  margin: 10px;
+  position: relative;
+  top: 8px;
+}
+
+.search-input {
+  font-size: 13px !important;
+}
+
+.aa-dimensions {
+  border-right: 1px solid rgba(0, 0, 0, 0.24);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.aa-filter-icon {
+  font-size: 160px;
+}
+
+.aa-card-header {
+  min-height: 38px;
+}
+
+.aa-chip {
+  background: $dark-grey !important;
+  color: white !important;
+  padding: 0 12px 0 12px !important;
+  .mat-icon {
+    height: 14px;
+    width: 14px;
+    font-size: 14px !important;
+    position: relative;
+    left: 5px;
+    cursor: pointer;
+  }
+}
+
+.aa-condition {
+  margin-left: 5px;
+}
+
+.aa-checkbox {
+  width: 100% !important;
+  /deep/ .mat-checkbox-layout {
+    width: 100% !important;
+    display: inline-block !important;
+  }
+}
+
+.aa-grid-list {
+  height: 80vh;
+}
+
+.dimmed {
+  color: $light-grey !important;
+}
+

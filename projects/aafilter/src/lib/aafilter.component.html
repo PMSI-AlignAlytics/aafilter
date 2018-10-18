@@ -1,0 +1,82 @@
+<mat-card class="mat-drawer-container p-n" id="filter">
+  <mat-card-header class="bg-white aa-card-header">
+    <mat-card-title class="m-n p-10">
+      <mat-chip-list>
+        <mat-chip class="aa-chip" *ngFor="let cond of conditions">
+          {{cond['name']}}
+          <ng-container *ngIf="cond['in']">:
+            <span *ngFor="let i of cond['in'] | slice:0:3" class="aa-condition">{{i}},</span>
+            <span class="aa-condition" *ngIf="cond['in'].length > 3"> & {{cond['in'].length - 3}} other values</span>
+          </ng-container>
+          <ng-container *ngIf="cond['nin']"> NOT:
+            <span *ngFor="let i of cond['nin'] | slice:0:3" class="aa-condition">{{i}},</span>
+            <span class="aa-condition" *ngIf="cond['nin'].length > 3"> & {{cond['nin'].length - 3}} other values</span>
+          </ng-container>
+
+          <mat-icon (click)="buildConditions(cond)">close</mat-icon>
+        </mat-chip>
+      </mat-chip-list>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="aa-content">
+    <mat-grid-list [cols]="3" rowHeight="fit" class="aa-grid-list" >
+      <mat-grid-tile class="aa-dimensions" [colspan]="1">
+        <mat-nav-list class="aa-list p-n">
+          <mat-list-item class="bg-white aa-list-item"
+                         (click)="selectDimension(d)"
+                         [ngClass]="{active: d.id === dimensionSelected.id}"
+                         *ngFor="let d of dimensions">
+            <a>{{d.display_name}}</a>
+          </mat-list-item>
+        </mat-nav-list>
+      </mat-grid-tile>
+      <mat-grid-tile [colspan]="2">
+        <mat-spinner [diameter]="50" *ngIf="spinner"></mat-spinner>
+        <div *ngIf="!queryResults && !spinner" class="grey flex-column ">
+          <div class="flex-item">
+            <mat-icon class="aa-filter-icon wh">filter_list</mat-icon>
+          </div>
+          <div class="flex-item">
+            Select a dimension to filter
+          </div>
+        </div>
+        <mat-list class="aa-list p-n" *ngIf="queryResults && !spinner">
+          <div class="search">
+            <mat-icon class="search-icon">search</mat-icon>
+            <mat-form-field class="search-input p-n">
+              <input matInput placeholder="Search" (keyup)="search()" [(ngModel)]="searchValue">
+            </mat-form-field>
+          </div>
+          <mat-list-item class="aa-checkbox-list-item">
+            <mat-checkbox [(ngModel)]="areAllChecked"
+                          (change)="selectAll(); buildConditions()">
+              Select All
+            </mat-checkbox>
+            <span class="spacer"></span>
+            <mat-checkbox class="float-right" #excluded (change)="exclude(excluded)"
+                          [(ngModel)]="dimensionSelected['excluded']">
+              Exclude
+            </mat-checkbox>
+          </mat-list-item>
+          <ng-container *ngFor="let qr of queryResultsFound">
+            <mat-list-item class="bg-white aa-checkbox-list-item">
+              <ng-container *ngIf="dimensionSelected.type !== 'time'; else pipeDate">
+                <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
+                              [ngClass]="{
+                              'dimmed': !this.dimensionSelected['dimmed'].includes(qr.name)
+                              && this.dimensionSelected['dimmed'].length > 0}"
+                              (change)="allChecked();  buildConditions();"> {{qr.name}}
+                </mat-checkbox>
+              </ng-container>
+              <ng-template #pipeDate>
+                <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
+                              (change)=" allChecked(); buildConditions();"> {{qr.name | date}}
+                </mat-checkbox>
+              </ng-template>
+            </mat-list-item>
+          </ng-container>
+        </mat-list>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </mat-card-content>
+</mat-card>
