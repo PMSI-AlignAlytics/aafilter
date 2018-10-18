@@ -1,6 +1,8 @@
 [![N|Solid](https://travelytic.io/wp-content/uploads/2018/08/AlignAlytics_Logo_Transparent-Background-0112.png)](https://align-alytics.com/)
 # Filter Module
-Filter module built with Angular 6 and angular material
+Filter module built with Angular 6 and Angular material..
+### Descripyion
+This is a filter to be implemented in your Angular Application to be able to filter Dimensions and make the correspondent queries
 
 ## Requirements
 * **[Angular material](https://material.angular.io)** 
