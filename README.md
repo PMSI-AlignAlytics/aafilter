@@ -44,4 +44,5 @@ Filter module built with Angular 6 and angular material
 | @Input() <br> dimensions: string    |  Card dimensions            |
 
 
-
+## Debug and Publish library on NPM
+https://github.com/AAMarcosHannecke/aafilter/wiki/Debug-and-Publish-library-to-NPM
