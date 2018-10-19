@@ -1,11 +1,23 @@
-import { TestBed, async } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import {async, TestBed} from '@angular/core/testing';
+import {AppComponent} from './app.component';
+import {AafilterComponent} from '../../projects/aafilter/src/lib/aafilter.component';
+import {MyOwnCustomMaterialModule} from '../../projects/aafilter/src/lib/aafilter.module';
+import {FormsModule} from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
+
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent
-      ],
+        AppComponent,
+        AafilterComponent
+      ], imports: [
+        MyOwnCustomMaterialModule,
+        FormsModule,
+        HttpClientModule
+      ], providers: [
+        HttpClientModule
+      ]
     }).compileComponents();
   }));
   it('should create the app', async(() => {
@@ -17,11 +29,5 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app.title).toEqual('AAFilter');
-  }));
-  it('should render title in a h1 tag', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to AAFilter!');
   }));
 });

@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-// import {Dimension} from '../model/dimension';
 
 interface Dimension {
   aggregation?: string;
@@ -18,26 +17,20 @@ interface Dimension {
   styleUrls: ['./aafilter.component.scss']
 })
 export class AafilterComponent implements OnInit {
-  httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Im1oYW5uZWNrZUBhbGlnbi1hbHl0aWNzLmNvbSIsImlzcyI6Im9tZWdhI' +
-        'iwic3ViIjoxOSwidXNlciI6eyJpZCI6MTksInVzZXJfbmFtZSI6Im1oYW5uZWNrZUBhbGlnbi1hbHl0aWNzLmNvbSIsImZ1bGxfbmFtZSI6Ik1hcmNvcyBIYW5uZWNrZ' +
-        'SIsImRpc2FibGVkIjpmYWxzZSwic3VwZXJfdXNlciI6dHJ1ZSwib3JnYW5pc2F0aW9uIjp7ImlkIjoxLCJuYW1lIjoiQWxpZ25BbHl0aWNzIiwic2V0dGluZ3MiOn' +
-        't9LCJpc19vd25lciI6ZmFsc2V9fSwiaWF0IjoxNTM5ODUzNDEzLCJleHAiOjE1Mzk5Mzk4MTN9.k2vvLfySvZswFqIAtOtJ3Ir6M_jkfddb0EixSbxj0iY'
-    })
-  };
+
   dimensionSelected: Dimension;
-  query: Array<object>;
+  query: object[];
   queryResults: any;
   queryResultsFound: any;
   searchValue: string;
   areAllChecked: boolean;
-  conditions: Array<object> = [];
+  conditions: object[] = [];
   spinner: boolean;
+  httpOptions: any;
 
   @Input() endpoint: string;
   @Input() cardEndpoint: string;
+  @Input() authToken: string;
   @Input() dimensions: any;
   @Output() outputQuery = new EventEmitter();
 
@@ -52,10 +45,20 @@ export class AafilterComponent implements OnInit {
       this.endpoint = 'http://localhost:9000/api/v2/sources/2';
       this.cardEndpoint = 'http://localhost:9000/api/v2/decks/1/cards/1';
     }
+
+    // Set headers
+    this.httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': this.authToken
+      })
+    };
+
     // Requests
     if (!this.dimensions) {
       this.getRequest();
     }
+
 
   }
 
@@ -65,7 +68,16 @@ export class AafilterComponent implements OnInit {
   private getRequest() {
     this.http.get(this.cardEndpoint, this.httpOptions)
       .subscribe((res): any => {
-        this.dimensions = res['data_source'].dimensions;
+        this.dimensions = res['data_source'].dimensions
+          .filter(d => d.type !== 'measure')
+          .sort((a, b) => {
+            if (a.display_name < b.display_name) {
+              return -1;
+            }
+            return 1;
+          }
+        );
+        console.log(this.dimensions);
       }, err => {
         console.log(err);
       });
@@ -127,7 +139,12 @@ export class AafilterComponent implements OnInit {
           }
         }
 
-        this.queryResults = this.queryResultsFound = resp;
+        this.queryResults = this.queryResultsFound = resp.sort((a, b) => {
+          if (a.name < b.name) {
+            return -1;
+          }
+          return 1;
+        });
         // dimension values
         this.dimensions.forEach(d => {
           if (d.display_name === this.dimensionSelected.display_name) {
