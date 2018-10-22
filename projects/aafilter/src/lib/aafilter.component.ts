@@ -2,13 +2,15 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 interface Dimension {
-  aggregation?: string;
-  data_options?: object;
-  display_name?: string;
+  aggregation: string;
+  data_options: object;
+  display_name: string;
   id: number;
-  options?: object;
-  type?: string;
+  options: object;
+  type: string;
   value?: string;
+  values?: object[];
+  excluded?: boolean;
 }
 
 @Component({
@@ -18,7 +20,7 @@ interface Dimension {
 })
 export class AafilterComponent implements OnInit {
 
-  dimensionSelected: Dimension;
+  dimensionSelected = {} as Dimension;
   query: object[];
   queryResults: any;
   queryResultsFound: any;
@@ -31,15 +33,17 @@ export class AafilterComponent implements OnInit {
   @Input() endpoint: string;
   @Input() cardEndpoint: string;
   @Input() authToken: string;
-  @Input() dimensions: any;
+  @Input() dimensions: Dimension[];
+  @Input() inputQueryResults: any;
   @Output() outputQuery = new EventEmitter();
+  @Output() outputResults = new EventEmitter();
 
 
   constructor(private http: HttpClient) {
   }
 
   ngOnInit() {
-    this.dimensionSelected = {id: null};
+    // this.dimensionSelected = {id: null};
 
     if (!this.endpoint) {
       this.endpoint = 'http://localhost:9000/api/v2/sources/2';
@@ -59,11 +63,10 @@ export class AafilterComponent implements OnInit {
       this.getRequest();
     }
 
-
   }
 
   /**
-   * GET
+   * Get card dimensions
    */
   private getRequest() {
     this.http.get(this.cardEndpoint, this.httpOptions)
@@ -71,20 +74,19 @@ export class AafilterComponent implements OnInit {
         this.dimensions = res['data_source'].dimensions
           .filter(d => d.type !== 'measure')
           .sort((a, b) => {
-            if (a.display_name < b.display_name) {
-              return -1;
+              if (a.display_name < b.display_name) {
+                return -1;
+              }
+              return 1;
             }
-            return 1;
-          }
-        );
-        console.log(this.dimensions);
+          );
       }, err => {
         console.log(err);
       });
   }
 
   /**
-   * POST
+   * POST dimension queries
    */
   private postRequest() {
     this.dimensionSelected['dimmed'] = [];
@@ -120,6 +122,7 @@ export class AafilterComponent implements OnInit {
       );
     }
 
+    // Output query
     this.outputQuery.emit(this.query);
 
     // Request
@@ -128,30 +131,42 @@ export class AafilterComponent implements OnInit {
         this.spinner = false;
         let resp: any = res;
         if (this.conditions.length > 0) {
-          if (cond.length > 0) {
-            this.dimensionSelected['dimmed'] = res[1].map(r => r.name);
-          }
           if (this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values) {
             resp = this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values;
-
           } else {
             resp = res[0];
           }
+
+          if (cond.length > 0) {
+            this.dimensionSelected['dimmed'] = res[1].map(r => r.name); // dim results
+            resp.forEach(re => {
+              re.dimmed = !this.dimensionSelected['dimmed'].includes(re.name);
+              if (re.checked && this.dimensionSelected['dimmed'].includes(re.name)) {
+                re.checked = true;
+              } else {
+                re.checked = false;
+              }
+            });
+            // this.buildConditions();
+          }
         }
 
+        // Results
         this.queryResults = this.queryResultsFound = resp.sort((a, b) => {
           if (a.name < b.name) {
             return -1;
           }
           return 1;
         });
+
         // dimension values
         this.dimensions.forEach(d => {
           if (d.display_name === this.dimensionSelected.display_name) {
-            d.values = resp; // used for search
+            d.values = resp;
           }
         });
-        this.allChecked();
+
+        this.buildConditions();
       }, err => {
         this.spinner = false;
         console.log(err);
@@ -187,11 +202,13 @@ export class AafilterComponent implements OnInit {
    */
   selectAll() {
     if (this.areAllChecked) {
-      this.queryResultsFound.forEach(qr => qr.checked = true);
-      // this.areAllChecked = true;
+      this.queryResultsFound.forEach(qr => {
+        if (!qr.dimmed) {
+          qr.checked = true;
+        }
+      });
     } else {
       this.queryResultsFound.forEach(qr => qr.checked = false);
-      // this.areAllChecked = false;
     }
   }
 
@@ -200,7 +217,7 @@ export class AafilterComponent implements OnInit {
    */
   allChecked() {
     this.areAllChecked = this.queryResultsFound.every(qr => qr.checked);
-    // if all unchecked  && no conditions removed dimmed
+    // if all unchecked  && no conditions, remove dimmed
     if (this.queryResultsFound.every(qr => !qr.checked) && this.conditions.length === 0) {
       this.dimensionSelected['dimmed'] = [];
     }
@@ -243,9 +260,9 @@ export class AafilterComponent implements OnInit {
         };
         condition[key] = d.values.map(v => {
           if (cond.name === d.display_name) {
-            v.checked = false;
-          } else if (v.checked) {
-            return v.name;
+            v['checked'] = false;
+          } else if (v['checked']) {
+            return v['name'];
           }
         }).filter(e => e); // filter undefined values
         if (condition[key].length > 0) {
@@ -254,6 +271,8 @@ export class AafilterComponent implements OnInit {
       }
     });
     this.allChecked();
+    // if conditions chip deleted
+    if (cond !== '') { this.postRequest(); }
   }
 
   /**
