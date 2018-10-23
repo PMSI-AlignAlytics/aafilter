@@ -12,7 +12,6 @@ interface Dimension {
   values?: object[];
   excluded?: boolean;
 }
-
 @Component({
   selector: 'aa-filter',
   templateUrl: './aafilter.component.html',
