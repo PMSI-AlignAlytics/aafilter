@@ -13,6 +13,16 @@ interface Dimension {
   excluded?: boolean;
 }
 
+/**
+ * Pipe to check if value is a valid date
+ */
+@Pipe({name: 'isDate'})
+export class IsDatePipe implements PipeTransform {
+  transform(value: string): any {
+    return Date.parse(value);
+  }
+}
+
 @Component({
   selector: 'aa-filter',
   templateUrl: './aafilter.component.html',
@@ -218,6 +228,7 @@ export class AafilterComponent implements OnInit {
    * Search
    */
   search() {
+    // TODO: improve search for date, at the moment searching original date not the one displayed after angular pipe applied
     if (this.searchValue.length === 0) {
       this.queryResultsFound = this.queryResults;
     } else {
@@ -281,16 +292,4 @@ export class AafilterComponent implements OnInit {
     this.buildConditions();
   }
 }
-
-/**
- * Pipe to check if value is date
- */
-@Pipe({name: 'isDate'})
-export class IsDatePipe implements PipeTransform {
-  transform(value: string): any {
-    return Date.parse(value);
-  }
-}
-
-
 

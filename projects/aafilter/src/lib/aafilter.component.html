@@ -51,7 +51,8 @@
           </div>
           <mat-list-item class="aa-checkbox-list-item">
             <mat-checkbox [(ngModel)]="areAllChecked"
-                          (change)="selectAll(); buildConditions()">
+                          (change)="selectAll(); buildConditions()"
+                          [disabled]="queryResultsFound.length === 0">
               Select All
             </mat-checkbox>
             <span class="spacer"></span>
