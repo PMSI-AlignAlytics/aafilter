@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { AafilterComponent } from './aafilter.component';
+import {AafilterComponent, IsDatePipe} from './aafilter.component';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {
@@ -52,9 +52,9 @@ export class MyOwnCustomMaterialModule {
     CommonModule,
     HttpClientModule,
     FormsModule,
-    MyOwnCustomMaterialModule
+    MyOwnCustomMaterialModule,
   ],
-  declarations: [AafilterComponent],
+  declarations: [AafilterComponent,     IsDatePipe],
   exports: [AafilterComponent]
 })
 export class AafilterModule { }

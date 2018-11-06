@@ -5,7 +5,9 @@
         <mat-chip class="aa-chip" *ngFor="let cond of conditions">
           {{cond['name']}}
           <ng-container *ngIf="cond['in']">:
-            <span *ngFor="let i of cond['in'] | slice:0:3" class="aa-condition">{{i}},</span>
+            <span *ngFor="let i of cond['in'] | slice:0:3" class="aa-condition">
+              {{(i | isDate) ? (i | date) : i}},
+            </span>
             <span class="aa-condition" *ngIf="cond['in'].length > 3"> & {{cond['in'].length - 3}} other values</span>
           </ng-container>
           <ng-container *ngIf="cond['nin']"> NOT:
@@ -19,7 +21,7 @@
     </mat-card-title>
   </mat-card-header>
   <mat-card-content class="aa-content">
-    <mat-grid-list [cols]="3" rowHeight="fit" class="aa-grid-list" >
+    <mat-grid-list [cols]="3" rowHeight="fit" class="aa-grid-list">
       <mat-grid-tile class="aa-dimensions" [colspan]="1">
         <mat-nav-list class="aa-list p-n">
           <mat-list-item class="bg-white aa-list-item"
@@ -60,18 +62,12 @@
           </mat-list-item>
           <ng-container *ngFor="let qr of queryResultsFound">
             <mat-list-item class="bg-white aa-checkbox-list-item">
-              <ng-container *ngIf="dimensionSelected.type !== 'time'; else pipeDate">
-                <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
-                              [ngClass]="{'dimmed': qr.dimmed}"
-                              [disabled]="qr.dimmed"
-                              (change)="allChecked();  buildConditions();"> {{qr.name}}
-                </mat-checkbox>
-              </ng-container>
-              <ng-template #pipeDate>
-                <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
-                              (change)=" allChecked(); buildConditions();"> {{qr.name | date}}
-                </mat-checkbox>
-              </ng-template>
+              <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
+                            [ngClass]="{'dimmed': qr.dimmed}"
+                            [disabled]="qr.dimmed"
+                            (change)="allChecked();  buildConditions();">
+                {{(dimensionSelected.type === 'time') ? (qr.name | date) : qr.name}}
+              </mat-checkbox>
             </mat-list-item>
           </ng-container>
         </mat-list>

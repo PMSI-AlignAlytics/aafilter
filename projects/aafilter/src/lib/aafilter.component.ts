@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, Pipe, PipeTransform} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 interface Dimension {
@@ -12,6 +12,7 @@ interface Dimension {
   values?: object[];
   excluded?: boolean;
 }
+
 @Component({
   selector: 'aa-filter',
   templateUrl: './aafilter.component.html',
@@ -45,7 +46,7 @@ export class AafilterComponent implements OnInit {
 
     if (!this.endpoint) {
       this.endpoint = 'http://localhost:9000/api/v2/sources/2';
-      this.cardEndpoint = 'http://localhost:9000/api/v2/decks/1/cards/1';
+      this.cardEndpoint = 'http://localhost:9000/api/v2/decks/1/cards/17';
     }
 
     // Set headers
@@ -64,7 +65,7 @@ export class AafilterComponent implements OnInit {
   }
 
   /**
-   * Get card dimensions
+   * GET card dimensions
    */
   private getRequest() {
     this.http.get(this.cardEndpoint, this.httpOptions)
@@ -72,8 +73,10 @@ export class AafilterComponent implements OnInit {
         this.dimensions = res['data_source'].dimensions
           .filter(d => d.type !== 'measure')
           .sort((a, b) => {
-              if (a.display_name < b.display_name) {return -1; }
-              return 1;
+            if (a.display_name < b.display_name) {
+              return -1;
+            }
+            return 1;
           });
       }, err => {
         console.log(err);
@@ -101,7 +104,6 @@ export class AafilterComponent implements OnInit {
     const cond = this.conditions.filter(e => {
       return e['name'] !== this.dimensionSelected.display_name;
     });
-
     if (cond.length > 0) {
       this.query.push(
         {
@@ -144,13 +146,17 @@ export class AafilterComponent implements OnInit {
 
         // Sort and assign Results
         this.queryResults = this.queryResultsFound = resp.sort((a, b) => {
-          if (a.name < b.name) {return -1; }
+          if (a.name < b.name) {
+            return -1;
+          }
           return 1;
         });
 
         // dimension values
         this.dimensions.forEach(d => {
-          if (d.display_name === this.dimensionSelected.display_name) {d.values = resp; }
+          if (d.display_name === this.dimensionSelected.display_name) {
+            d.values = resp;
+          }
         });
 
         this.buildConditions();
@@ -216,7 +222,9 @@ export class AafilterComponent implements OnInit {
       this.queryResultsFound = this.queryResults;
     } else {
       this.queryResultsFound = this.queryResults.filter(qrf => {
-        if (qrf.name.toLowerCase().includes(this.searchValue.toLowerCase())) {return qrf; }
+        if (qrf.name.toLowerCase().includes(this.searchValue.toLowerCase())) {
+          return qrf;
+        }
       });
     }
     this.allChecked();
@@ -227,7 +235,9 @@ export class AafilterComponent implements OnInit {
    * @param cond -->  removes 'cond' from 'this.conditions'
    */
   buildConditions(cond?) {
-    if (!cond) {cond = ''; }
+    if (!cond) {
+      cond = '';
+    }
     this.conditions = [];
     let condition;
     let key;
@@ -253,7 +263,9 @@ export class AafilterComponent implements OnInit {
     });
     this.allChecked();
     // if conditions chip deleted
-    if (cond) {this.postRequest(); }
+    if (cond) {
+      this.postRequest();
+    }
   }
 
   /**
@@ -267,6 +279,16 @@ export class AafilterComponent implements OnInit {
       }
     });
     this.buildConditions();
+  }
+}
+
+/**
+ * Pipe to check if value is date
+ */
+@Pipe({name: 'isDate'})
+export class IsDatePipe implements PipeTransform {
+  transform(value: string): any {
+    return Date.parse(value);
   }
 }
 
