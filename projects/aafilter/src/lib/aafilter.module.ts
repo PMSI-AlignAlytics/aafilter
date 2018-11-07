@@ -54,7 +54,7 @@ export class MyOwnCustomMaterialModule {
     FormsModule,
     MyOwnCustomMaterialModule,
   ],
-  declarations: [AafilterComponent,     IsDatePipe],
+  declarations: [AafilterComponent, IsDatePipe],
   exports: [AafilterComponent]
 })
 export class AafilterModule { }

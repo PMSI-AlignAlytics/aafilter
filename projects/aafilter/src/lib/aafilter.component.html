@@ -14,7 +14,6 @@
             <span *ngFor="let i of cond['nin'] | slice:0:3" class="aa-condition">{{i}},</span>
             <span class="aa-condition" *ngIf="cond['nin'].length > 3"> & {{cond['nin'].length - 3}} other values</span>
           </ng-container>
-
           <mat-icon (click)="buildConditions(cond)">close</mat-icon>
         </mat-chip>
       </mat-chip-list>

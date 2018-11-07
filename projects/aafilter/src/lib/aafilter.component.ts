@@ -39,6 +39,7 @@ export class AafilterComponent implements OnInit {
   conditions: object[] = [];
   spinner: boolean;
   httpOptions: any;
+  months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   @Input() endpoint: string;
   @Input() cardEndpoint: string;
@@ -228,12 +229,17 @@ export class AafilterComponent implements OnInit {
    * Search
    */
   search() {
-    // TODO: improve search for date, at the moment searching original date not the one displayed after angular pipe applied
     if (this.searchValue.length === 0) {
       this.queryResultsFound = this.queryResults;
     } else {
       this.queryResultsFound = this.queryResults.filter(qrf => {
-        if (qrf.name.toLowerCase().includes(this.searchValue.toLowerCase())) {
+        if (this.dimensionSelected.type === 'time') { // condition to search date in the same format displayed
+          let date: any = new Date(qrf.name);
+          date = `${this.months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+          if (date.toLowerCase().includes(this.searchValue.toLowerCase())) {
+            return qrf;
+          }
+        } else if (qrf.name.toLowerCase().includes(this.searchValue.toLowerCase())) {
           return qrf;
         }
       });
