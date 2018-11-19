@@ -86,6 +86,9 @@ $grey: #ccc;
 
 .aa-content {
   border-top: 1px solid $grey;
+  /deep/ .mat-subheader {
+    height: 35px !important;
+  }
 }
 
 label {

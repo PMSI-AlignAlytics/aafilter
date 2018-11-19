@@ -6,8 +6,8 @@
           {{cond['name']}}
           <ng-container *ngIf="cond['in']">:
             <span *ngFor="let i of cond['in'] | slice:0:3" class="aa-condition">
-              {{(i | isDate) ? (i | date) : i}},
-            </span>
+              {{(i | isDate) ? (i | displayFormat: cond['format']) : i}},
+    </span>
             <span class="aa-condition" *ngIf="cond['in'].length > 3"> & {{cond['in'].length - 3}} other values</span>
           </ng-container>
           <ng-container *ngIf="cond['nin']"> NOT:
@@ -23,12 +23,16 @@
     <mat-grid-list [cols]="3" rowHeight="fit" class="aa-grid-list">
       <mat-grid-tile class="aa-dimensions" [colspan]="1">
         <mat-nav-list class="aa-list p-n">
-          <mat-list-item class="bg-white aa-list-item"
-                         (click)="selectDimension(d)"
-                         [ngClass]="{active: d.id === dimensionSelected.id}"
-                         *ngFor="let d of dimensions">
-            <a>{{d.display_name}}</a>
-          </mat-list-item>
+          <ng-container *ngFor="let group of groups">
+            <div *ngIf="group.key" matSubheader>{{group.key}}</div>
+            <mat-list-item class="bg-white aa-list-item"
+                           (click)="selectDimension(dimension)"
+                           [ngClass]="{active: dimension.id === dimensionSelected.id}"
+                           *ngFor="let dimension of group.items">
+              <a>{{dimension.display_name}}</a>
+            </mat-list-item>
+          </ng-container>
+
         </mat-nav-list>
       </mat-grid-tile>
       <mat-grid-tile [colspan]="2">
@@ -66,7 +70,9 @@
                             [ngClass]="{'dimmed': qr.dimmed}"
                             [disabled]="qr.dimmed"
                             (change)="allChecked();  buildConditions();">
-                {{(dimensionSelected.type === 'time') ? (qr.name | date) : qr.name}}
+                <!--{{(dimensionSelected.type === 'time') ? (qr.name | date) : qr.name}}-->
+                {{(dimensionSelected.type === 'time') ? (qr.name | displayFormat: dimensionSelected.options['format']) :
+                qr.name}}
               </mat-checkbox>
             </mat-list-item>
           </ng-container>
