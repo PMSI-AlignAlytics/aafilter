@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, Pipe, PipeTransform} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, Pipe, PipeTransform, SimpleChanges} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import * as d3 from 'd3-time-format';
 
@@ -21,6 +21,7 @@ interface DimensionGroup {
 
 
 // TODO: improve Date pipes and update documentation
+// No name was provided for external module 'd3-time-format' in output.globals – guessing 'd3'
 /**
  * Pipe to check if value is a valid date
  */
@@ -53,7 +54,7 @@ export class DisplayFormatPipe implements PipeTransform {
   templateUrl: './aafilter.component.html',
   styleUrls: ['./aafilter.component.scss']
 })
-export class AafilterComponent implements OnInit {
+export class AafilterComponent implements OnInit, OnChanges {
 
   dimensionSelected = {} as Dimension;
   query: object[];
@@ -71,6 +72,7 @@ export class AafilterComponent implements OnInit {
   @Input() authToken: string;
   @Input() dimensions: Dimension[];
   @Input() inputQueryResults: any;
+  @Input() event: string;
   @Output() outputQuery = new EventEmitter();
   @Output() outputResults = new EventEmitter();
 
@@ -81,7 +83,6 @@ export class AafilterComponent implements OnInit {
   }
 
   ngOnInit() {
-    // this.dimensionSelected = {id: null};
 
     if (!this.endpoint) {
       this.endpoint = 'http://localhost:9000/api/v2/sources/1';
@@ -101,6 +102,13 @@ export class AafilterComponent implements OnInit {
       this.getRequest();
     }
 
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.event.currentValue === 'close') {
+      console.log(this.conditions);
+      this.postRequest(true);
+    }
   }
 
   /**
@@ -128,7 +136,8 @@ export class AafilterComponent implements OnInit {
   /**
    * POST dimension queries
    */
-  private postRequest() {
+  private postRequest(close?) {
+
     this.dimensionSelected['dimmed'] = [];
 
     // Build query
@@ -142,12 +151,14 @@ export class AafilterComponent implements OnInit {
       }
     ];
 
-    // filter conditions for dimension selected
+    // filter conditions for dimension selected if not closing
     const cond = this.conditions.filter(e => {
       delete e['format'];
-      return e['name'] !== this.dimensionSelected.display_name;
+      if (!close) {
+        return e['name'] !== this.dimensionSelected.display_name;
+      }
+      return e;
     });
-
 
     if (cond.length > 0) {
       this.query.push(
@@ -381,7 +392,6 @@ export class AafilterComponent implements OnInit {
     });
 
     if (foundGrouping) {
-      console.log('found');
       // Iterate through data and group by
       items.forEach(function (item) {
         const g = grouping(item.options);
@@ -393,7 +403,6 @@ export class AafilterComponent implements OnInit {
         }
       });
     } else {
-      console.log('not found');
       result[0] = {
         key: null,
         items: items

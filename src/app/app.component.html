@@ -2,9 +2,11 @@
   endpoint="http://localhost:9000/api/v2/sources/2"
   cardEndpoint="http://localhost:9000/api/v2/decks/1/cards/17"
   [authToken]="token"
+  [event]="event"
   (outputQuery)="log($event)">
   <!--[dimensions]="false"-->
   <!--[inputQueryResults]="false"-->
 
   <!--(outputResults)="false"-->
 </aa-filter>
+<button (click)="event = 'close'">close button</button>
