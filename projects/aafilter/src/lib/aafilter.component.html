@@ -7,7 +7,7 @@
           <ng-container *ngIf="cond['in']">:
             <span *ngFor="let i of cond['in'] | slice:0:3" class="aa-condition">
               {{(i | isDate) ? (i | displayFormat: cond['format']) : i}},
-    </span>
+            </span>
             <span class="aa-condition" *ngIf="cond['in'].length > 3"> & {{cond['in'].length - 3}} other values</span>
           </ng-container>
           <ng-container *ngIf="cond['nin']"> NOT:

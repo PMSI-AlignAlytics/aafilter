@@ -73,7 +73,7 @@ export class AafilterComponent implements OnInit, OnChanges {
   @Input() dimensions: Dimension[];
   @Input() inputQueryResults: any;
   @Input() event: string;
-  @Output() outputQuery = new EventEmitter();
+  @Output() outputConditions = new EventEmitter();
   @Output() outputResults = new EventEmitter();
 
   groups: DimensionGroup[];
@@ -151,6 +151,12 @@ export class AafilterComponent implements OnInit, OnChanges {
       }
     ];
 
+    if (close) {
+      // Output conditions: has to go before deleting format!!
+      this.outputConditions.emit(JSON.stringify(this.conditions));
+    }
+
+
     // filter conditions for dimension selected if not closing
     const cond = this.conditions.filter(e => {
       delete e['format'];
@@ -159,6 +165,8 @@ export class AafilterComponent implements OnInit, OnChanges {
       }
       return e;
     });
+
+
 
     if (cond.length > 0) {
       this.query.push(
@@ -175,8 +183,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       );
     }
 
-    // Output query
-    this.outputQuery.emit(JSON.stringify(this.query));
+
 
     // Request
     this.http.post(`${this.endpoint}?action=query`, this.query, this.httpOptions)
