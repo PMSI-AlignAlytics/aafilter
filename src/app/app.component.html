@@ -3,7 +3,8 @@
   cardEndpoint="http://localhost:9000/api/v2/decks/1/cards/17"
   [authToken]="token"
   [event]="event"
-  (outputConditions)="log($event)">
+  (outputConditions)="log($event)"
+  [currentConditions]="currentConditions">
   <!--[dimensions]="false"-->
   <!--[inputQueryResults]="false"-->
 

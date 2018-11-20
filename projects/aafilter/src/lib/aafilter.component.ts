@@ -71,7 +71,7 @@ export class AafilterComponent implements OnInit, OnChanges {
   @Input() cardEndpoint: string;
   @Input() authToken: string;
   @Input() dimensions: Dimension[];
-  @Input() inputQueryResults: any;
+  @Input() currentConditions: any;
   @Input() event: string;
   @Output() outputConditions = new EventEmitter();
   @Output() outputResults = new EventEmitter();
@@ -102,11 +102,11 @@ export class AafilterComponent implements OnInit, OnChanges {
       this.getRequest();
     }
 
+
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.event.currentValue === 'close') {
-      console.log(this.conditions);
       this.postRequest(true);
     }
   }
@@ -119,7 +119,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       .subscribe((res): any => {
 
         this.dimensions = res['data_source'].dimensions
-          .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure
+          .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure and geo
           .sort((a, b) => {
             if (a.display_name < b.display_name) {
               return -1;
@@ -128,6 +128,38 @@ export class AafilterComponent implements OnInit, OnChanges {
           });
 
         this.groupDimensions(this.dimensions);
+
+        // Current conditions from app
+        if (this.currentConditions) {
+          this.dimensions.forEach(d => {
+            this.currentConditions.forEach(cc => {
+              if (cc.name === d.display_name) {
+                d.values = [];
+                if (cc['in']) {
+                  cc['in'].forEach(ccin => {
+                    d.values.push({
+                      name: ccin,
+                      checked: true
+                    });
+                  });
+                }
+                if (cc['nin']) {
+                  d.excluded = true;
+                  cc['nin'].forEach(ccnin => {
+                    d.values.push({
+                      name: ccnin,
+                      checked: true
+                    });
+                  });
+                }
+                console.log(cc.name, d.display_name);
+              }
+            });
+          });
+        }
+
+        console.log(this.dimensions);
+        this.buildConditions();
       }, err => {
         console.log(err);
       });
@@ -140,24 +172,25 @@ export class AafilterComponent implements OnInit, OnChanges {
 
     this.dimensionSelected['dimmed'] = [];
 
+    const name = this.dimensionSelected.display_name;
     // Build query
     this.query = [
       {
         'fields': [{
-          name: this.dimensionSelected.display_name,
+          name: name,
           alias: 'name'
         }],
         'simple': true
       }
     ];
 
+    // Send conditions when closing dialog
     if (close) {
       // Output conditions: has to go before deleting format!!
       this.outputConditions.emit(JSON.stringify(this.conditions));
     }
 
-
-    // filter conditions for dimension selected if not closing
+    // delete format and filter conditions for dimension selected if not closing
     const cond = this.conditions.filter(e => {
       delete e['format'];
       if (!close) {
@@ -167,12 +200,11 @@ export class AafilterComponent implements OnInit, OnChanges {
     });
 
 
-
     if (cond.length > 0) {
       this.query.push(
         {
           'fields': [{
-            name: this.dimensionSelected.display_name,
+            name: name,
             alias: 'name'
           }],
           'filter': {
@@ -182,8 +214,6 @@ export class AafilterComponent implements OnInit, OnChanges {
         }
       );
     }
-
-
 
     // Request
     this.http.post(`${this.endpoint}?action=query`, this.query, this.httpOptions)
@@ -195,6 +225,9 @@ export class AafilterComponent implements OnInit, OnChanges {
             resp = this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values;
           } else {
             resp = res[0];
+            if (!resp.length) { // TODO: double check
+              resp = res;
+            }
           }
 
           // Dim / Disable results|
@@ -207,6 +240,7 @@ export class AafilterComponent implements OnInit, OnChanges {
           }
         }
 
+
         // Sort and assign Results
         this.queryResults = this.queryResultsFound = resp.sort((a, b) => {
           if (a.name < b.name) {
@@ -215,12 +249,16 @@ export class AafilterComponent implements OnInit, OnChanges {
           return 1;
         });
 
+        console.log(this.queryResultsFound);
+
         // dimension values
         this.dimensions.forEach(d => {
           if (d.display_name === this.dimensionSelected.display_name) {
             d.values = resp;
           }
         });
+
+        console.log('dimensionsPost', this.dimensions);
 
         this.buildConditions();
       }, err => {
@@ -304,6 +342,7 @@ export class AafilterComponent implements OnInit, OnChanges {
    * @param cond -->  removes 'cond' from 'this.conditions'
    */
   buildConditions(cond?) {
+
     if (!cond) {
       cond = '';
     }
@@ -331,11 +370,15 @@ export class AafilterComponent implements OnInit, OnChanges {
         }
       }
     });
-    this.allChecked();
-    // if conditions chip deleted
-    if (cond) {
-      this.postRequest();
+
+    if (this.dimensionSelected.display_name) { // if a dimension is selected
+      this.allChecked();
+      // if conditions chip deleted
+      if (cond) {
+        this.postRequest();
+      }
     }
+
   }
 
   /**
