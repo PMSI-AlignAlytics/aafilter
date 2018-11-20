@@ -33,7 +33,7 @@ export class IsDatePipe implements PipeTransform {
 }
 
 /**
- * Display date format pipe
+ * Display date format pipes
  */
 @Pipe({name: 'displayFormat'})
 export class DisplayFormatPipe implements PipeTransform {
@@ -71,13 +71,12 @@ export class AafilterComponent implements OnInit, OnChanges {
   @Input() cardEndpoint: string;
   @Input() authToken: string;
   @Input() dimensions: Dimension[];
-  @Input() currentConditions: any;
+  @Input() externalConditions: any;
   @Input() event: string;
   @Output() outputConditions = new EventEmitter();
   @Output() outputResults = new EventEmitter();
 
   groups: DimensionGroup[];
-
 
   constructor(private http: HttpClient) {
   }
@@ -102,11 +101,10 @@ export class AafilterComponent implements OnInit, OnChanges {
       this.getRequest();
     }
 
-
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.event.currentValue === 'close') {
+    if (changes.event.currentValue === 'close') { // to detects when dialog from app closes
       this.postRequest(true);
     }
   }
@@ -129,36 +127,32 @@ export class AafilterComponent implements OnInit, OnChanges {
 
         this.groupDimensions(this.dimensions);
 
-        // Current conditions from app
-        if (this.currentConditions) {
+        // External conditions from app
+        if (this.externalConditions) {
           this.dimensions.forEach(d => {
-            this.currentConditions.forEach(cc => {
-              if (cc.name === d.display_name) {
+            this.externalConditions.forEach(ec => {
+              if (ec.name === d.display_name) {
                 d.values = [];
-                if (cc['in']) {
-                  cc['in'].forEach(ccin => {
+                if (ec['in']) {
+                  ec['in'].forEach(ccin => {
                     d.values.push({
                       name: ccin,
                       checked: true
                     });
                   });
-                }
-                if (cc['nin']) {
+                } else if (ec['nin']) {
                   d.excluded = true;
-                  cc['nin'].forEach(ccnin => {
+                  ec['nin'].forEach(ccnin => {
                     d.values.push({
                       name: ccnin,
                       checked: true
                     });
                   });
                 }
-                console.log(cc.name, d.display_name);
               }
             });
           });
         }
-
-        console.log(this.dimensions);
         this.buildConditions();
       }, err => {
         console.log(err);
@@ -169,7 +163,6 @@ export class AafilterComponent implements OnInit, OnChanges {
    * POST dimension queries
    */
   private postRequest(close?) {
-
     this.dimensionSelected['dimmed'] = [];
 
     const name = this.dimensionSelected.display_name;
@@ -217,29 +210,36 @@ export class AafilterComponent implements OnInit, OnChanges {
 
     // Request
     this.http.post(`${this.endpoint}?action=query`, this.query, this.httpOptions)
-      .subscribe((res): any => {
+      .subscribe((res: any): any => {
         this.spinner = false;
         let resp: any = res;
         if (this.conditions.length > 0) {
           if (this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values) {
+            // get values stored in dimension
             resp = this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values;
+            // check for extra values in the response (case when values added from external app conditions)
+            const response = this.query.length > 1 ? res[0] : res;
+            response.forEach(rs => {
+              if (!JSON.stringify(resp).includes(rs.name)) {
+                resp.push(rs);
+              }
+            });
           } else {
             resp = res[0];
-            if (!resp.length) { // TODO: double check
+            if (!resp.length) {
               resp = res;
             }
           }
 
-          // Dim / Disable results|
+          // Dim / Disable results
           if (cond.length > 0) {
             this.dimensionSelected['dimmed'] = res[1].map(r => r.name);
             resp.forEach(re => {
-              re.dimmed = !this.dimensionSelected['dimmed'].includes(re.name);
-              re.checked = !!(re.checked && this.dimensionSelected['dimmed'].includes(re.name));
+              re.dimmed = !this.dimensionSelected['dimmed'].includes(re.name); // Dim
+              re.checked = !!(re.checked && this.dimensionSelected['dimmed'].includes(re.name)); // uncheck if dimmed
             });
           }
         }
-
 
         // Sort and assign Results
         this.queryResults = this.queryResultsFound = resp.sort((a, b) => {
@@ -248,8 +248,6 @@ export class AafilterComponent implements OnInit, OnChanges {
           }
           return 1;
         });
-
-        console.log(this.queryResultsFound);
 
         // dimension values
         this.dimensions.forEach(d => {
