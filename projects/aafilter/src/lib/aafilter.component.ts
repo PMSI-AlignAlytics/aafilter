@@ -184,14 +184,14 @@ export class AafilterComponent implements OnInit, OnChanges {
     }
 
     // delete format and filter conditions for dimension selected if not closing
-    const cond = this.conditions.filter(e => {
+    let cond = this.conditions.map(x => Object.assign({}, x));
+    cond = cond.filter(e => {
       delete e['format'];
       if (!close) {
         return e['name'] !== this.dimensionSelected.display_name;
       }
       return e;
     });
-
 
     if (cond.length > 0) {
       this.query.push(
@@ -255,8 +255,6 @@ export class AafilterComponent implements OnInit, OnChanges {
             d.values = resp;
           }
         });
-
-        console.log('dimensionsPost', this.dimensions);
 
         this.buildConditions();
       }, err => {
@@ -344,6 +342,7 @@ export class AafilterComponent implements OnInit, OnChanges {
     if (!cond) {
       cond = '';
     }
+
     this.conditions = [];
     let condition;
     let key;
