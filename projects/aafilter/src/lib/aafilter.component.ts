@@ -28,6 +28,9 @@ interface DimensionGroup {
 @Pipe({name: 'isDate'})
 export class IsDatePipe implements PipeTransform {
   transform(value: string): any {
+    if (value.toLowerCase().includes('quarter')) {
+      return null;
+    }
     return Date.parse(value);
   }
 }
@@ -67,8 +70,8 @@ export class AafilterComponent implements OnInit, OnChanges {
   httpOptions: any;
   months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  @Input() endpoint: string;
-  @Input() cardEndpoint: string;
+  @Input() queryEndpoint: string;
+  @Input() dimensionsEndpoint: string;
   @Input() authToken: string;
   @Input() dimensions: Dimension[];
   @Input() externalConditions: any;
@@ -83,10 +86,10 @@ export class AafilterComponent implements OnInit, OnChanges {
 
   ngOnInit() {
 
-    if (!this.endpoint) {
-      this.endpoint = 'http://localhost:9000/api/v2/sources/1';
-      this.cardEndpoint = 'http://localhost:9000/api/v2/decks/1/cards/17';
-    }
+    // if (!this.queryEndpoint) {
+    //   this.queryEndpoint = 'http://localhost:9000/api/v2/sources/1';
+    //   this.dimensionsEndpoint = 'http://localhost:9000/api/v2/decks/1/cards/17';
+    // }
 
     // Set headers
     this.httpOptions = {
@@ -113,10 +116,11 @@ export class AafilterComponent implements OnInit, OnChanges {
    * GET card dimensions
    */
   private getRequest() {
-    this.http.get(this.cardEndpoint, this.httpOptions)
-      .subscribe((res): any => {
+    this.http.get(this.dimensionsEndpoint, this.httpOptions)
+      .subscribe((res: any): any => {
 
-        this.dimensions = res['data_source'].dimensions
+        // this.dimensions = res['data_source'].dimensions
+        this.dimensions = res.dimensions
           .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure and geo
           .sort((a, b) => {
             if (a.display_name < b.display_name) {
@@ -170,8 +174,8 @@ export class AafilterComponent implements OnInit, OnChanges {
     this.query = [
       {
         'fields': [{
-          name: name,
-          alias: 'name'
+          'name': name,
+          'alias': 'name'
         }],
         'simple': true
       }
@@ -197,8 +201,8 @@ export class AafilterComponent implements OnInit, OnChanges {
       this.query.push(
         {
           'fields': [{
-            name: name,
-            alias: 'name'
+            'name': name,
+            'alias': 'name'
           }],
           'filter': {
             'conditions': cond
@@ -209,7 +213,7 @@ export class AafilterComponent implements OnInit, OnChanges {
     }
 
     // Request
-    this.http.post(`${this.endpoint}?action=query`, this.query, this.httpOptions)
+    this.http.post(`${this.queryEndpoint}?action=query`, this.query, this.httpOptions)
       .subscribe((res: any): any => {
         this.spinner = false;
         let resp: any = res;
