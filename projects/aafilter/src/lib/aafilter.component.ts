@@ -95,7 +95,7 @@ export class AafilterComponent implements OnInit, OnChanges {
     this.httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': this.authToken
+        // 'Authorization': this.authToken
       })
     };
 
@@ -118,7 +118,7 @@ export class AafilterComponent implements OnInit, OnChanges {
   private getRequest() {
     this.http.get(this.dimensionsEndpoint, this.httpOptions)
       .subscribe((res: any): any => {
-
+        /** change this line to test with local **/
         // this.dimensions = res['data_source'].dimensions
         this.dimensions = res.dimensions
           .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure and geo
@@ -211,56 +211,60 @@ export class AafilterComponent implements OnInit, OnChanges {
         }
       );
     }
-
+    // get values stored in dimension
+    const values = this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values;
+    const dimensionSelected = this.dimensionSelected;
     // Request
     this.http.post(`${this.queryEndpoint}?action=query`, this.query, this.httpOptions)
       .subscribe((res: any): any => {
-        this.spinner = false;
-        let resp: any = res;
-        if (this.conditions.length > 0) {
-          if (this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values) {
-            // get values stored in dimension
-            resp = this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values;
-            // check for extra values in the response (case when values added from external app conditions)
-            const response = this.query.length > 1 ? res[0] : res;
-            response.forEach(rs => {
-              if (!JSON.stringify(resp).includes(rs.name)) {
-                resp.push(rs);
+        if (dimensionSelected === this.dimensionSelected) {
+          this.spinner = false;
+          let resp: any = res;
+          if (this.conditions.length > 0) {
+            if (values) { // if values stored in dimension
+              resp = values;
+              // check for extra values in the response (case when values added from external app conditions)
+              const response = this.query.length > 1 ? res[0] : res;
+              response.forEach(rs => {
+                if (!JSON.stringify(resp).includes(rs.name)) {
+                  resp.push(rs);
+                }
+              });
+
+            } else {
+              resp = res[0];
+              if (!resp.length) {
+                resp = res;
               }
-            });
-          } else {
-            resp = res[0];
-            if (!resp.length) {
-              resp = res;
+            }
+
+            // Dim / Disable results
+            if (cond.length > 0) {
+              this.dimensionSelected['dimmed'] = res[1].map(r => r.name);
+              resp.forEach(re => {
+                re.dimmed = !this.dimensionSelected['dimmed'].includes(re.name); // Dim
+                re.checked = !!(re.checked && this.dimensionSelected['dimmed'].includes(re.name)); // uncheck if dimmed
+              });
             }
           }
 
-          // Dim / Disable results
-          if (cond.length > 0) {
-            this.dimensionSelected['dimmed'] = res[1].map(r => r.name);
-            resp.forEach(re => {
-              re.dimmed = !this.dimensionSelected['dimmed'].includes(re.name); // Dim
-              re.checked = !!(re.checked && this.dimensionSelected['dimmed'].includes(re.name)); // uncheck if dimmed
-            });
-          }
+          // Sort and assign Results
+          this.queryResults = this.queryResultsFound = resp.sort((a, b) => {
+            if (a.name < b.name) {
+              return -1;
+            }
+            return 1;
+          });
+
+          // dimension values
+          this.dimensions.forEach(d => {
+            if (d.display_name === this.dimensionSelected.display_name) {
+              d.values = resp;
+            }
+          });
+
+          this.buildConditions();
         }
-
-        // Sort and assign Results
-        this.queryResults = this.queryResultsFound = resp.sort((a, b) => {
-          if (a.name < b.name) {
-            return -1;
-          }
-          return 1;
-        });
-
-        // dimension values
-        this.dimensions.forEach(d => {
-          if (d.display_name === this.dimensionSelected.display_name) {
-            d.values = resp;
-          }
-        });
-
-        this.buildConditions();
       }, err => {
         this.spinner = false;
         console.log(err);
