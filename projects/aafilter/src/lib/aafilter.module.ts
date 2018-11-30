@@ -15,6 +15,7 @@ import {
   MatProgressSpinnerModule
 } from '@angular/material';
 import {CommonModule} from '@angular/common';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 
 
 @NgModule({
@@ -52,6 +53,7 @@ export class MyOwnCustomMaterialModule {
     HttpClientModule,
     FormsModule,
     MyOwnCustomMaterialModule,
+    ScrollingModule
   ],
   declarations: [AafilterComponent, IsDatePipe, DisplayFormatPipe],
   exports: [AafilterComponent]

@@ -63,8 +63,8 @@
               Exclude
             </mat-checkbox>
           </mat-list-item>
-          <ng-container *ngFor="let qr of queryResultsFound">
-            <mat-list-item class="bg-white aa-checkbox-list-item">
+          <cdk-virtual-scroll-viewport itemSize="32">
+            <mat-list-item class="bg-white aa-checkbox-list-item" *cdkVirtualFor="let qr of queryResultsFound">
               <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
                             [ngClass]="{'dimmed': qr.dimmed}"
                             [disabled]="qr.dimmed"
@@ -74,7 +74,7 @@
                 qr.name}}
               </mat-checkbox>
             </mat-list-item>
-          </ng-container>
+          </cdk-virtual-scroll-viewport>
         </mat-list>
       </mat-grid-tile>
     </mat-grid-list>
