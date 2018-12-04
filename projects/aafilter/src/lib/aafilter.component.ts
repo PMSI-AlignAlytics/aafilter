@@ -27,7 +27,7 @@ interface DimensionGroup {
  */
 @Pipe({name: 'isDate'})
 export class IsDatePipe implements PipeTransform {
-  transform(value: string): any {
+  transform(value: any): any {
     // if (value.toLowerCase().includes('quarter') || Number(value)) {
     //   return null;
     // }
