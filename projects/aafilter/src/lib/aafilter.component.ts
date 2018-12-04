@@ -28,10 +28,11 @@ interface DimensionGroup {
 @Pipe({name: 'isDate'})
 export class IsDatePipe implements PipeTransform {
   transform(value: string): any {
-    if (value.toLowerCase().includes('quarter')) {
-      return null;
-    }
-    return Date.parse(value);
+    // if (value.toLowerCase().includes('quarter') || Number(value)) {
+    //   return null;
+    // }
+    // return Date.parse(value);
+    return value instanceof Date && !isNaN(Number(value));
   }
 }
 
@@ -170,6 +171,7 @@ export class AafilterComponent implements OnInit, OnChanges {
     this.dimensionSelected['dimmed'] = [];
 
     const name = this.dimensionSelected.display_name;
+
     // Build query
     this.query = [
       {
@@ -229,7 +231,7 @@ export class AafilterComponent implements OnInit, OnChanges {
                 const response = this.query.length > 1 ? res[0] : res;
                 const string = JSON.stringify(resp);
                 response.forEach(rs => {
-                  if (string.includes(rs.name)) {
+                  if (!string.includes(rs.name)) {
                     resp.push(rs);
                   }
                 });
@@ -365,7 +367,8 @@ export class AafilterComponent implements OnInit, OnChanges {
       if (d.values) {
         condition = {
           'name': d.display_name,
-          'format': d.options['format']
+          'format': d.options['format'],
+          'value': d.value
         };
         condition[key] = d.values.map(v => {
           if (cond.name === d.display_name) {
@@ -379,7 +382,6 @@ export class AafilterComponent implements OnInit, OnChanges {
         }
       }
     });
-
     if (this.dimensionSelected.display_name) { // if a dimension is selected
       this.allChecked();
       // if conditions chip deleted
