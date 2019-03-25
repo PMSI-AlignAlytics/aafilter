@@ -1,6 +1,6 @@
 {
   "name": "aafilter",
-  "version": "1.0.9",
+  "version": "1.0.14",
   "peerDependencies": {
     "@angular/common": "^7.0.4",
     "@angular/core": "^7.0.4"

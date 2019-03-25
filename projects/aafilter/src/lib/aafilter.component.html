@@ -5,12 +5,16 @@
         <mat-chip class="aa-chip" *ngFor="let cond of conditions">
           {{cond['name']}}
           <ng-container *ngIf="cond['in']">:
-            <span *ngFor="let i of cond['in'] | slice:0:3; let ind = index" class="aa-condition">{{(i | isDate) ? (i | displayFormat: cond['format']) : i}}<ng-container *ngIf="ind !== 2 && ind !== cond['in'].length -1">, </ng-container>
+            <span *ngFor="let i of cond['in'] | slice:0:3; let ind = index"
+                  class="aa-condition">{{(i | isDate) ? (i | displayFormat: cond['format']) : i}}
+              <ng-container *ngIf="ind !== 2 && ind !== cond['in'].length -1">, </ng-container>
             </span>
             <span class="aa-condition" *ngIf="cond['in'].length > 3"> & {{cond['in'].length - 3}} other values</span>
           </ng-container>
           <ng-container *ngIf="cond['nin']"> NOT:
-            <span *ngFor="let i of cond['nin'] | slice:0:3; let ind = index" class="aa-condition">{{(i | isDate) ? (i | displayFormat: cond['format']) : i}}<ng-container *ngIf="ind !== 2 && ind !== cond['nin'].length -1">, </ng-container></span>
+            <span *ngFor="let i of cond['nin'] | slice:0:3; let ind = index"
+                  class="aa-condition">{{(i | isDate) ? (i | displayFormat: cond['format']) : i}}
+              <ng-container *ngIf="ind !== 2 && ind !== cond['nin'].length -1">, </ng-container></span>
             <span class="aa-condition" *ngIf="cond['nin'].length > 3"> & {{cond['nin'].length - 3}} other values</span>
           </ng-container>
           <mat-icon (click)="buildConditions(cond)">close</mat-icon>
@@ -46,12 +50,18 @@
         </div>
         <mat-list class="aa-list p-n" *ngIf="queryResults && !spinner">
           <div class="search">
-            <mat-icon class="search-icon">search</mat-icon>
-            <mat-form-field class="search-input p-n">
-              <input matInput placeholder="Search" (keyup)="search()" [(ngModel)]="searchValue">
-            </mat-form-field>
+            <div class="flex-input">
+              <mat-icon class="search-icon">search</mat-icon>
+              <mat-form-field class="search-input p-n">
+                <input matInput placeholder="Search" (keyup)="search()" [(ngModel)]="searchValue">
+              </mat-form-field>
+            </div>
+            <div class="search-visibility" (click)="hideDimmed()">
+              <mat-icon *ngIf="hideShowDimmed">visibility</mat-icon>
+              <mat-icon *ngIf="!hideShowDimmed">visibility_off</mat-icon>
+            </div>
           </div>
-          <mat-list-item class="aa-checkbox-list-item">
+          <mat-list-item class="aa-checkbox-list-item select-all">
             <mat-checkbox [(ngModel)]="areAllChecked"
                           (change)="selectAll(); buildConditions()"
                           [disabled]="queryResultsFound.length === 0">
@@ -64,16 +74,21 @@
             </mat-checkbox>
           </mat-list-item>
           <cdk-virtual-scroll-viewport itemSize="32">
-            <mat-list-item class="bg-white aa-checkbox-list-item" *cdkVirtualFor="let qr of queryResultsFound">
-              <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
-                            [ngClass]="{'dimmed': qr.dimmed}"
-                            [disabled]="qr.dimmed"
-                            (change)="allChecked();  buildConditions();">
-                <!--{{(dimensionSelected.type === 'time') ? (qr.name | date) : qr.name}}-->
-                {{(dimensionSelected.type === 'time') ? (qr.name | displayFormat: dimensionSelected.options['format']) :
-                qr.name}}
-              </mat-checkbox>
-            </mat-list-item>
+            <ng-container *cdkVirtualFor="let qr of queryResultsFound">
+              <mat-list-item class="bg-white aa-checkbox-list-item" *ngIf="!qr.hide">
+                <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
+                              [ngClass]="{'dimmed': qr.dimmed}"
+                              [disabled]="qr.dimmed"
+                              (change)="allChecked();  buildConditions();">
+                  <!--{{(dimensionSelected.type === 'time') ? (qr.name | date) : qr.name}}-->
+                  {{(dimensionSelected.type === 'time') ? (qr.name | displayFormat: dimensionSelected.options['format']) :
+                  qr.name}}
+                </mat-checkbox>
+              </mat-list-item>
+            </ng-container>
+            <div class="items-hidden" *ngIf="!hideShowDimmed">
+              <i>Hiding {{inactiveValues}} inactive values</i>
+            </div>
           </cdk-virtual-scroll-viewport>
         </mat-list>
       </mat-grid-tile>

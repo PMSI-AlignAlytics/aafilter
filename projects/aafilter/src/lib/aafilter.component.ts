@@ -19,7 +19,6 @@ interface DimensionGroup {
   key: '';
 }
 
-
 // TODO: improve Date pipes and update documentation
 // No name was provided for external module 'd3-time-format' in output.globals – guessing 'd3'
 /**
@@ -70,6 +69,7 @@ export class AafilterComponent implements OnInit, OnChanges {
   spinner: boolean;
   httpOptions: any;
   months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  hideShowDimmed = true;
 
   @Input() queryEndpoint: string;
   @Input() dimensionsEndpoint: string;
@@ -81,6 +81,7 @@ export class AafilterComponent implements OnInit, OnChanges {
   @Output() outputResults = new EventEmitter();
 
   groups: DimensionGroup[];
+  inactiveValues: any;
 
   constructor(private http: HttpClient) {
   }
@@ -95,8 +96,9 @@ export class AafilterComponent implements OnInit, OnChanges {
     // Set headers
     this.httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        // 'Authorization': this.authToken
+        'Content-Type': 'application/json; charset=UTF-8',
+        /** Add this line for dev **/
+        'Authorization': this.authToken
       })
     };
 
@@ -119,9 +121,9 @@ export class AafilterComponent implements OnInit, OnChanges {
   private getRequest() {
     this.http.get(this.dimensionsEndpoint, this.httpOptions)
       .subscribe((res: any): any => {
-        /** change this line to test with local **/
-        // this.dimensions = res['data_source'].dimensions
-        this.dimensions = res.dimensions
+        /** change this.dimensions line for dev **/
+        this.dimensions = res['data_source'].dimensions // dev
+        // this.dimensions = res.dimensions // prod
           .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure and geo
           .sort((a, b) => {
             if (a.display_name < b.display_name) {
@@ -243,12 +245,16 @@ export class AafilterComponent implements OnInit, OnChanges {
                 }
               }
 
-              // Dim / Disable results
+              // reset visibility icon
+              this.hideShowDimmed = true;
+
+              // Dim / Disable / hide  results
               if (cond.length > 0) {
                 this.dimensionSelected['dimmed'] = res[1].map(r => r.name);
                 resp.forEach(re => {
                   re.dimmed = !this.dimensionSelected['dimmed'].includes(re.name); // Dim
                   re.checked = !!(re.checked && this.dimensionSelected['dimmed'].includes(re.name)); // uncheck if dimmed
+                  re.hide = false;
                 });
               }
             }
@@ -406,7 +412,6 @@ export class AafilterComponent implements OnInit, OnChanges {
   }
 
   groupDimensions(items) {
-
     //   function groupDimensions (items) {
     function grouping(options) {
       if (options.display_group) {
@@ -418,13 +423,7 @@ export class AafilterComponent implements OnInit, OnChanges {
     if (!items) {
       return;
     }
-    const oLookup = {},
-      result = [];
-
-    //     // Sort the dimension's name in ascending order first
-    //     // Sort the dimension's display group in ascending order second
-    //     var data = angular.copy(items);
-
+    const oLookup = {}, result = [];
     items.sort(function (a, b) {
       const aL = a.display_name ? a.display_name.toLowerCase() : '';
       const bL = b.display_name ? b.display_name.toLowerCase() : '';
@@ -472,87 +471,16 @@ export class AafilterComponent implements OnInit, OnChanges {
 
     this.groups = result;
   }
-}
 
-// Used to test grouping
-// let items = [{
-//   'id': 31783,
-//   'display_name': 'Result (level 2)',
-//   'type': 'category',
-//   'options': {'multiple': false, 'display_group': 'Result', 'uniques': 2}
-// }, {
-//   'id': 31772,
-//   'display_name': 'Date',
-//   'type': 'time',
-//   'options': {'format': '%d-%B-%y', 'uniques': 4, 'display_group': 'Date'}
-// }, {
-//   'id': 31775,
-//   'display_name': 'Column',
-//   'type': 'category',
-//   'options': {'multiple': false, 'display_group': 'Field', 'uniques': 14}
-// }, {
-//   'id': 31779,
-//   'display_name': 'Issue score',
-//   'type': 'measure',
-//   'options': {'fixed': '2', 'suffix': '%', 'display_group': 'Result'}
-// }, {
-//   'id': 31780,
-//   'display_name': 'Parameter_1',
-//   'type': 'measure',
-//   'options': {'display_group': 'Rule'},
-//   'aggregation': 'avg'
-// }, {
-//   'id': 31776,
-//   'display_name': 'Rule name',
-//   'type': 'category',
-//   'options': {'multiple': false, 'uniques': 2, 'display_group': 'Rule'}
-// }, {'id': 31777, 'display_name': 'Issue count', 'type': 'measure', 'options': {'display_group': 'Result'}}, {
-//   'id': 31781,
-//   'display_name': 'Parameter_2',
-//   'type': 'measure',
-//   'options': {'display_group': 'Rule'},
-//   'aggregation': 'avg'
-// }, {
-//   'id': 31774,
-//   'display_name': 'Datasource',
-//   'type': 'category',
-//   'options': {'multiple': false, 'display_group': 'Field', 'uniques': 2}
-// }, {
-//   'id': 31773,
-//   'display_name': 'Project',
-//   'type': 'category',
-//   'options': {'multiple': false, 'display_group': 'Category', 'uniques': 1}
-// }, {
-//   'id': 31771,
-//   'display_name': 'Rank',
-//   'type': 'category',
-//   'options': {'multiple': false, 'display_group': 'Date', 'uniques': 7}
-// }, {'id': 31778, 'display_name': 'Rows total', 'type': 'measure', 'options': {'display_group': 'Counts'}}, {
-//   'id': 31811,
-//   'display_name': 'Column value',
-//   'type': 'category',
-//   'options': {'uniques': 20, 'display_group': 'Field'}
-// }, {'id': 31810, 'display_name': 'Level', 'type': 'category', 'options': {'uniques': 2, 'display_group': 'Rule'}}, {
-//   'id': 31782,
-//   'display_name': 'Threshold',
-//   'type': 'measure',
-//   'options': {'display_group': 'Rule'},
-//   'aggregation': 'avg'
-// }, {'id': 31861, 'display_name': 'Rule Type', 'type': 'category', 'options': {'display_group': 'Rule', 'uniques': 2}}, {
-//   'id': 31812,
-//   'display_name': 'Test count',
-//   'type': 'measure',
-//   'options': {'display_group': 'Counts'},
-//   'aggregation': 'countdist'
-// }, {
-//   'id': 31770,
-//   'display_name': 'Count',
-//   'type': 'measure',
-//   'options': {'display_group': 'Counts'},
-//   'aggregation': 'sum'
-// }, {'id': 31860, 'display_name': 'Tag', 'type': 'category', 'options': {'uniques': 8, 'display_group': 'Category'}}, {
-//   'id': 31862,
-//   'display_name': 'Description',
-//   'type': 'category',
-//   'options': {'display_group': 'Rule', 'uniques': 14}
-// }, {'id': 32165, 'display_name': 'Result', 'type': 'category', 'options': {'display_group': 'Result', 'uniques': 2}}];
+  /**
+   * Hide dimmed results
+   */
+  hideDimmed() {
+    this.hideShowDimmed = !this.hideShowDimmed;
+    const inactiveValues = this.queryResultsFound.filter(qr => {
+      qr['hide'] = qr['dimmed'] && !this.hideShowDimmed;
+      return qr['hide'];
+    });
+    this.inactiveValues = inactiveValues.length;
+  }
+}
