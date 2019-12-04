@@ -123,7 +123,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       .subscribe((res: any): any => {
         /** change this.dimensions line for dev **/
         this.dimensions = res['data_source'].dimensions // dev
-        // this.dimensions = res.dimensions // prod
+          // this.dimensions = res.dimensions // prod
           .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure and geo
           .sort((a, b) => {
             if (a.display_name < b.display_name) {
