@@ -56,7 +56,7 @@
                 <input matInput placeholder="Search" (keyup)="search()" [(ngModel)]="searchValue">
               </mat-form-field>
             </div>
-            <div class="search-visibility" (click)="hideDimmed()">
+            <div class="search-visibility" (click)="hideShowDimmed = !hideShowDimmed;">
               <mat-icon *ngIf="hideShowDimmed">visibility</mat-icon>
               <mat-icon *ngIf="!hideShowDimmed">visibility_off</mat-icon>
             </div>
@@ -74,7 +74,7 @@
             </mat-checkbox>
           </mat-list-item>
           <cdk-virtual-scroll-viewport itemSize="32">
-            <ng-container *cdkVirtualFor="let qr of queryResultsFound">
+            <ng-container *cdkVirtualFor="let qr of queryResultsFound | hideDimmed: hideShowDimmed">
               <mat-list-item class="bg-white aa-checkbox-list-item" *ngIf="!qr.hide">
                 <mat-checkbox class="aa-checkbox" [(ngModel)]="qr.checked"
                               [ngClass]="{'dimmed': qr.dimmed}"

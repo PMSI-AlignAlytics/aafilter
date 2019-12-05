@@ -52,6 +52,19 @@ export class DisplayFormatPipe implements PipeTransform {
   }
 }
 
+/**
+ * Hide dimmed
+ */
+@Pipe({name: 'hideDimmed'})
+export class HideDimmedPipe implements PipeTransform {
+  transform(values: any, hideShowDimmed): any {
+    if (!hideShowDimmed) {
+      return values.filter(qr => !qr['dimmed']);
+    }
+    return values;
+  }
+}
+
 @Component({
   selector: 'aa-filter',
   templateUrl: './aafilter.component.html',
@@ -82,6 +95,7 @@ export class AafilterComponent implements OnInit, OnChanges {
 
   groups: DimensionGroup[];
   inactiveValues: any;
+  private unsubscribe: any = {};
 
   constructor(private http: HttpClient) {
   }
@@ -98,7 +112,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       headers: new HttpHeaders({
         'Content-Type': 'application/json; charset=UTF-8',
         /** Add this line for dev **/
-        'Authorization': this.authToken
+        // 'Authorization': this.authToken
       })
     };
 
@@ -119,11 +133,14 @@ export class AafilterComponent implements OnInit, OnChanges {
    * GET card dimensions
    */
   private getRequest() {
-    this.http.get(this.dimensionsEndpoint, this.httpOptions)
+    if (this.unsubscribe.get) {
+      this.unsubscribe.get.unsubscribe();
+    }
+    this.unsubscribe.get = this.http.get(this.dimensionsEndpoint, this.httpOptions)
       .subscribe((res: any): any => {
         /** change this.dimensions line for dev **/
-        this.dimensions = res['data_source'].dimensions // dev
-          // this.dimensions = res.dimensions // prod
+        // this.dimensions = res['data_source'].dimensions // dev
+          this.dimensions = res.dimensions // prod
           .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure and geo
           .sort((a, b) => {
             if (a.display_name < b.display_name) {
@@ -220,8 +237,12 @@ export class AafilterComponent implements OnInit, OnChanges {
       // get values stored in dimension
       const values = this.dimensions.find(obj => obj.display_name === this.dimensionSelected.display_name).values;
       const dimensionSelected = this.dimensionSelected;
+
+      if (this.unsubscribe.post) {
+        this.unsubscribe.post.unsubscribe();
+      }
       // Request
-      this.http.post(`${this.queryEndpoint}?action=query`, this.query, this.httpOptions)
+      this.unsubscribe.post = this.http.post(`${this.queryEndpoint}?action=query`, this.query, this.httpOptions)
         .subscribe((res: any): any => {
           if (dimensionSelected === this.dimensionSelected) {
             this.spinner = false;
@@ -249,12 +270,17 @@ export class AafilterComponent implements OnInit, OnChanges {
               this.hideShowDimmed = true;
 
               // Dim / Disable / hide  results
+              this.inactiveValues = 0;
               if (cond.length > 0) {
                 this.dimensionSelected['dimmed'] = res[1].map(r => r.name);
                 resp.forEach(re => {
                   re.dimmed = !this.dimensionSelected['dimmed'].includes(re.name); // Dim
                   re.checked = !!(re.checked && this.dimensionSelected['dimmed'].includes(re.name)); // uncheck if dimmed
                   re.hide = false;
+                  // Counts number of values dimmed
+                  if (re.dimmed) {
+                    this.inactiveValues += 1;
+                  }
                 });
               }
             }
@@ -470,17 +496,5 @@ export class AafilterComponent implements OnInit, OnChanges {
     }
 
     this.groups = result;
-  }
-
-  /**
-   * Hide dimmed results
-   */
-  hideDimmed() {
-    this.hideShowDimmed = !this.hideShowDimmed;
-    const inactiveValues = this.queryResultsFound.filter(qr => {
-      qr['hide'] = qr['dimmed'] && !this.hideShowDimmed;
-      return qr['hide'];
-    });
-    this.inactiveValues = inactiveValues.length;
   }
 }

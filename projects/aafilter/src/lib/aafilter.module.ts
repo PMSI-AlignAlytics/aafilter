@@ -1,5 +1,5 @@
 import {NgModule} from '@angular/core';
-import {AafilterComponent, DisplayFormatPipe, IsDatePipe} from './aafilter.component';
+import {AafilterComponent, DisplayFormatPipe, HideDimmedPipe, IsDatePipe} from './aafilter.component';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {
@@ -55,7 +55,8 @@ export class MyOwnCustomMaterialModule {
     MyOwnCustomMaterialModule,
     ScrollingModule
   ],
-  declarations: [AafilterComponent, IsDatePipe, DisplayFormatPipe],
+  declarations: [AafilterComponent, IsDatePipe, DisplayFormatPipe, HideDimmedPipe],
   exports: [AafilterComponent]
 })
-export class AafilterModule { }
+export class AafilterModule {
+}
