@@ -90,6 +90,9 @@ export class AafilterComponent implements OnInit, OnChanges {
   @Input() dimensions: Dimension[];
   @Input() externalConditions: any;
   @Input() event: string;
+  @Input() dataSetId: string;
+
+
   @Output() outputConditions = new EventEmitter();
   @Output() outputResults = new EventEmitter();
 
@@ -102,18 +105,25 @@ export class AafilterComponent implements OnInit, OnChanges {
 
   ngOnInit() {
 
+    // https://alytic.io/api/v2/sources/
+    // https://alytic.io/api/v2/sources/151?action=query
+
     // if (!this.queryEndpoint) {
     //   this.queryEndpoint = 'http://localhost:9000/api/v2/sources/1';
     //   this.dimensionsEndpoint = 'http://localhost:9000/api/v2/decks/1/cards/17';
     // }
 
+    const hds: any = {
+      'Content-Type': 'application/json; charset=UTF-8'
+    };
+
+    if (this.authToken) {
+      hds.Authorization = this.authToken;
+    }
+
     // Set headers
     this.httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json; charset=UTF-8',
-        /** Add this line for dev **/
-        // 'Authorization': this.authToken
-      })
+      headers: new HttpHeaders(hds)
     };
 
     // Requests
@@ -136,11 +146,16 @@ export class AafilterComponent implements OnInit, OnChanges {
     if (this.unsubscribe.get) {
       this.unsubscribe.get.unsubscribe();
     }
-    this.unsubscribe.get = this.http.get(this.dimensionsEndpoint, this.httpOptions)
+    const request = {
+      url: `https://alytic.io/api/v2/sources/${this.dataSetId}`,
+      method: 'GET'
+    };
+
+    this.unsubscribe.get = this.http.post(`/api/alytics/connect`, request)
       .subscribe((res: any): any => {
         /** change this.dimensions line for dev **/
         // this.dimensions = res['data_source'].dimensions // dev
-          this.dimensions = res.dimensions // prod
+        this.dimensions = res.dimensions // prod
           .filter(d => d.type !== 'measure' && d.type !== 'geo') // remove type measure and geo
           .sort((a, b) => {
             if (a.display_name < b.display_name) {
@@ -241,8 +256,16 @@ export class AafilterComponent implements OnInit, OnChanges {
       if (this.unsubscribe.post) {
         this.unsubscribe.post.unsubscribe();
       }
+
+      const request = {
+        url: `https://alytic.io/api/v2/sources/${this.dataSetId}?action=query`,
+        method: 'POST',
+        body: this.query
+      };
+
       // Request
-      this.unsubscribe.post = this.http.post(`${this.queryEndpoint}?action=query`, this.query, this.httpOptions)
+      // this.unsubscribe.post = this.http.post(`${this.queryEndpoint}?action=query`, this.query, this.httpOptions)
+      this.unsubscribe.post = this.http.post(`/api/alytics/connect`, request)
         .subscribe((res: any): any => {
           if (dimensionSelected === this.dimensionSelected) {
             this.spinner = false;
