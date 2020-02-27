@@ -1,13 +1,13 @@
-<aa-filter
-  queryEndpoint="http://localhost:9000/api/v2/sources/2410"
-  dimensionsEndpoint="http://localhost:9000/api/v2/decks/10516/cards/172077"
-  [authToken]="token"
-  [event]="event"
-  (outputConditions)="log($event)"
-  [externalConditions]="externalConditions">
-  <!--[dimensions]="false"-->
-  <!--[inputQueryResults]="false"-->
+<!--<aa-filter-->
+<!--  queryEndpoint="http://localhost:9000/api/v2/sources/2410"-->
+<!--  dimensionsEndpoint="http://localhost:9000/api/v2/decks/10516/cards/172077"-->
+<!--  [authToken]="token"-->
+<!--  [event]="event"-->
+<!--  (outputConditions)="log($event)"-->
+<!--  [externalConditions]="externalConditions">-->
+<!--  &lt;!&ndash;[dimensions]="false"&ndash;&gt;-->
+<!--  &lt;!&ndash;[inputQueryResults]="false"&ndash;&gt;-->
 
-  <!--(outputResults)="false"-->
-</aa-filter>
+<!--  &lt;!&ndash;(outputResults)="false"&ndash;&gt;-->
+<!--</aa-filter>-->
 <button (click)="event = 'close'">close button</button>

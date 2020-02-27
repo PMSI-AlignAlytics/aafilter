@@ -84,13 +84,12 @@ export class AafilterComponent implements OnInit, OnChanges {
   months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   hideShowDimmed = true;
 
-  @Input() queryEndpoint: string;
-  @Input() dimensionsEndpoint: string;
-  @Input() authToken: string;
   @Input() dimensions: Dimension[];
   @Input() externalConditions: any;
   @Input() event: string;
+  @Input() mainUrl: string;
   @Input() dataSetId: string;
+  @Input() authToken: string;
 
 
   @Output() outputConditions = new EventEmitter();
@@ -151,7 +150,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       method: 'GET'
     };
 
-    this.unsubscribe.get = this.http.post(`/api/alytics/connect`, request)
+    this.unsubscribe.get = this.http.post(this.mainUrl, request)
       .subscribe((res: any): any => {
         /** change this.dimensions line for dev **/
         // this.dimensions = res['data_source'].dimensions // dev
@@ -264,8 +263,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       };
 
       // Request
-      // this.unsubscribe.post = this.http.post(`${this.queryEndpoint}?action=query`, this.query, this.httpOptions)
-      this.unsubscribe.post = this.http.post(`/api/alytics/connect`, request)
+      this.unsubscribe.post = this.http.post(this.mainUrl, request)
         .subscribe((res: any): any => {
           if (dimensionSelected === this.dimensionSelected) {
             this.spinner = false;
