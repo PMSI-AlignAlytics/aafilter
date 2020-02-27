@@ -251,7 +251,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       const request = {
         url: `https://alytic.io/api/v2/sources/${this.dataSetId}?action=query`,
         method: 'POST',
-        body: this.query
+        body: JSON.stringify(this.query)
       };
 
       // Request
