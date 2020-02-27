@@ -104,14 +104,6 @@ export class AafilterComponent implements OnInit, OnChanges {
 
   ngOnInit() {
 
-    // https://alytic.io/api/v2/sources/
-    // https://alytic.io/api/v2/sources/151?action=query
-
-    // if (!this.queryEndpoint) {
-    //   this.queryEndpoint = 'http://localhost:9000/api/v2/sources/1';
-    //   this.dimensionsEndpoint = 'http://localhost:9000/api/v2/decks/1/cards/17';
-    // }
-
     const hds: any = {
       'Content-Type': 'application/json; charset=UTF-8'
     };
@@ -150,7 +142,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       method: 'GET'
     };
 
-    this.unsubscribe.get = this.http.post(this.mainUrl, request)
+    this.unsubscribe.get = this.http.post(this.mainUrl, request, this.httpOptions)
       .subscribe((res: any): any => {
         /** change this.dimensions line for dev **/
         // this.dimensions = res['data_source'].dimensions // dev
@@ -263,7 +255,7 @@ export class AafilterComponent implements OnInit, OnChanges {
       };
 
       // Request
-      this.unsubscribe.post = this.http.post(this.mainUrl, request)
+      this.unsubscribe.post = this.http.post(this.mainUrl, request, this.httpOptions)
         .subscribe((res: any): any => {
           if (dimensionSelected === this.dimensionSelected) {
             this.spinner = false;
