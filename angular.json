@@ -164,5 +164,8 @@
       }
     }
   },
-  "defaultProject": "AAFilter"
+  "defaultProject": "AAFilter",
+  "cli": {
+    "analytics": false
+  }
 }
